@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include "afxcmn.h"
+#include "afxwin.h"
 
 class CAssignment2Set;
 
@@ -47,6 +49,48 @@ protected:
 // 생성된 메시지 맵 함수
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	CImageList m_LargeImageList;
+	CImageList m_SmallImageList;
+
+	CListCtrl m_List;
+
+	CEdit m_EditName;
+	CEdit m_EidtMail;
+	CEdit m_EditPhone;
+	CEdit m_EditCompany;
+	CEdit m_EditGroup;
+
+	CButton m_ButtonTotal;
+	CButton m_ButtonAdd;
+	CButton m_ButtonMod;
+	CButton m_ButtonDel;
+	CButton m_ButtonSearch;
+
+	int currentPos;
+	int recordCount;
+
+	BOOL bAdd;
+	BOOL bUpdate;
+	BOOL bSearch;
+
+	void AddColumn();
+	void SetImageList();
+	void AddAllRecord();
+	void GetTotalRecordCount();
+	afx_msg void OnRecordFirst();
+	afx_msg void OnRecordLast();
+	afx_msg void OnRecordNext();
+	afx_msg void OnRecordPrev();
+
+	void Init();
+	void Clear();
+	afx_msg void OnBnClickedButtonTotal();
+	afx_msg void OnBnClickedButtonAdd();
+	afx_msg void OnBnClickedButtonUpdate();
+	afx_msg void OnBnClickedButtonDelete();
+	afx_msg void OnBnClickedButtonSearch();
+	afx_msg void OnBnClickedButtonCancel();
 };
 
 #ifndef _DEBUG  // Assignment2View.cpp의 디버그 버전

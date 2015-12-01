@@ -27,6 +27,16 @@ BEGIN_MESSAGE_MAP(CAssignment2View, CRecordView)
 	ON_COMMAND(ID_FILE_PRINT, &CRecordView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CRecordView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CRecordView::OnFilePrintPreview)
+	ON_COMMAND(ID_RECORD_FIRST, &CAssignment2View::OnRecordFirst)
+	ON_COMMAND(ID_RECORD_LAST, &CAssignment2View::OnRecordLast)
+	ON_COMMAND(ID_RECORD_NEXT, &CAssignment2View::OnRecordNext)
+	ON_COMMAND(ID_RECORD_PREV, &CAssignment2View::OnRecordPrev)
+	ON_BN_CLICKED(IDC_BUTTON_TOTAL, &CAssignment2View::OnBnClickedButtonTotal)
+	ON_BN_CLICKED(IDC_BUTTON_ADD, &CAssignment2View::OnBnClickedButtonAdd)
+	ON_BN_CLICKED(IDC_BUTTON_UPDATE, &CAssignment2View::OnBnClickedButtonUpdate)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CAssignment2View::OnBnClickedButtonDelete)
+	ON_BN_CLICKED(IDC_BUTTON_SEARCH, &CAssignment2View::OnBnClickedButtonSearch)
+	ON_BN_CLICKED(IDC_BUTTON_CANcEL, &CAssignment2View::OnBnClickedButtonCancel)
 END_MESSAGE_MAP()
 
 // CAssignment2View 생성/소멸
@@ -36,7 +46,12 @@ CAssignment2View::CAssignment2View()
 {
 	m_pSet = NULL;
 	// TODO: 여기에 생성 코드를 추가합니다.
+	currentPos = 1;
+	recordCount = 0;
 
+	bAdd = FALSE;
+	bUpdate = FALSE;
+	bSearch = FALSE;
 }
 
 CAssignment2View::~CAssignment2View()
@@ -50,6 +65,28 @@ void CAssignment2View::DoDataExchange(CDataExchange* pDX)
 	// DDX_FieldText(pDX, IDC_MYEDITBOX, m_pSet->m_szColumn1, m_pSet);
 	// DDX_FieldCheck(pDX, IDC_MYCHECKBOX, m_pSet->m_bColumn2, m_pSet);
 	// 자세한 내용은 MSDN 및 ODBC 샘플을 참조하십시오.
+
+	DDX_Control(pDX, IDC_LIST1, m_List);
+
+	DDX_Control(pDX, IDC_EDIT_NAME, m_EditName);
+	DDX_Control(pDX, IDC_EDIT_EMAIL, m_EidtMail);
+	DDX_Control(pDX, IDC_EDIT_PHONE, m_EditPhone);
+	DDX_Control(pDX, IDC_EDIT_COMPANY, m_EditCompany);
+	DDX_Control(pDX, IDC_EDIT_GROUP, m_EditGroup);
+
+	DDX_Control(pDX, IDC_BUTTON_TOTAL, m_ButtonTotal);
+	DDX_Control(pDX, IDC_BUTTON_ADD, m_ButtonAdd);
+	DDX_Control(pDX, IDC_BUTTON_UPDATE, m_ButtonMod);
+	DDX_Control(pDX, IDC_BUTTON_DELETE, m_ButtonDel);
+	DDX_Control(pDX, IDC_BUTTON_SEARCH, m_ButtonSearch);
+
+	// 컨트롤을 데이터 베이스 필드에 연결
+	DDX_FieldText(pDX, IDC_EDIT_NAME, m_pSet->m_name, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_EMAIL, m_pSet->m_email, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_PHONE, m_pSet->m_phone, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_COMPANY, m_pSet->m_company, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_GROUP, m_pSet->m_group, m_pSet);
+
 }
 
 BOOL CAssignment2View::PreCreateWindow(CREATESTRUCT& cs)
@@ -65,6 +102,10 @@ void CAssignment2View::OnInitialUpdate()
 	m_pSet = &GetDocument()->m_Assignment2Set;
 	CRecordView::OnInitialUpdate();
 
+	AddColumn();
+	SetImageList();
+	AddAllRecord();
+	GetTotalRecordCount();
 }
 
 
@@ -117,3 +158,237 @@ CRecordset* CAssignment2View::OnGetRecordset()
 
 
 // CAssignment2View 메시지 처리기
+void CAssignment2View::AddColumn() {
+	CRect rect;
+	// 리스트 컨트롤의 크기를 얻어온다.
+	m_List.GetClientRect(&rect);
+	// 컬럼추가
+	m_List.InsertColumn(0, _T("이름"), LVCFMT_RIGHT, 100);
+	m_List.InsertColumn(1, _T("이메일 계정"), LVCFMT_LEFT, rect.Width() - 400);
+	m_List.InsertColumn(2, _T("전화번호"), LVCFMT_LEFT, 100);
+	m_List.InsertColumn(3, _T("직장명"), LVCFMT_LEFT, 100);
+	m_List.InsertColumn(4, _T("그룹"), LVCFMT_LEFT, 100);
+}
+
+
+void CAssignment2View::SetImageList() {
+	m_LargeImageList.Create(IDB_BITMAP_LARGE, 48, 1, RGB(0, 0, 0));
+	m_SmallImageList.Create(IDB_BITMAP_SMALL, 16, 1, RGB(0, 0, 0));
+	m_List.SetImageList(&m_LargeImageList, LVSIL_NORMAL);
+	m_List.SetImageList(&m_SmallImageList, LVSIL_SMALL);
+}
+
+
+void CAssignment2View::AddAllRecord() {
+	int i = 0;
+	CString strTemp;
+	
+	CAssignment2Set rsSet(m_pSet->m_pDatabase);
+	rsSet.Open(CRecordset::dynaset, _T("select * from address"));
+	m_List.DeleteAllItems();
+
+	while (rsSet.IsEOF() == FALSE) {
+		strTemp.Format(_T("%4d"), rsSet.m_ID);
+		m_List.InsertItem(i, strTemp, 0);
+		m_List.SetItemText(i, 1, rsSet.m_name);
+		m_List.SetItemText(i, 2, rsSet.m_email);
+		m_List.SetItemText(i, 3, rsSet.m_phone);
+		m_List.SetItemText(i, 4, rsSet.m_company);
+		m_List.SetItemText(i, 5, rsSet.m_group);
+
+		//strTemp.Format(_T("%4ld"), rsSet.m_price);
+		//m_List.SetItemText(i, 3, strTemp);
+		rsSet.MoveNext();
+		i++;
+	}
+	rsSet.Close();
+}
+
+
+
+void CAssignment2View::GetTotalRecordCount() {
+	CRecordset cntSet(m_pSet->m_pDatabase); 
+	cntSet.Open(CRecordset::dynaset, _T("select count(*) from address")); // 전체 레코드의 개수를 구함 
+	CString strCount; 
+	cntSet.GetFieldValue((short)0,strCount); 
+	recordCount = atoi((char *)(const wchar_t *)strCount); 
+	cntSet.Close();
+}
+
+
+void CAssignment2View::OnRecordFirst() {
+	if (recordCount == 0) return; 
+	currentPos = 1; // 현재 위치값을 1로 지정 
+	m_pSet->MoveFirst(); // 첫 번째 레코드로 이동 
+	UpdateData(FALSE); // Recordset 변수 값을 컨트롤에 출력
+}
+
+
+void CAssignment2View::OnRecordLast() {
+	if (recordCount == 0) return; 
+	currentPos = recordCount; // 현재 위치 값을 전체 레코드 수 지정 
+	m_pSet->MoveLast(); // 마지막 레코드로 이동 
+	UpdateData(FALSE);
+}
+
+
+void CAssignment2View::OnRecordNext() {
+	if (recordCount == 0)return;
+	currentPos++; // 현재 위치 값을 1증가시킴
+	m_pSet->MoveNext(); // 다음 레코드 위치로 이동
+	if (m_pSet->IsEOF()) {
+		m_pSet->MoveLast();
+		currentPos--;
+	}
+	UpdateData(FALSE);
+}
+
+
+void CAssignment2View::OnRecordPrev() {
+	if (recordCount == 0) return;
+	currentPos--; // 현재 위치 값을 1감소시킴
+	m_pSet->MovePrev(); // 이전 레코드 위치로 이동
+	if (m_pSet->IsBOF()) {
+		m_pSet->MoveFirst();
+		currentPos = 1;
+	}
+	UpdateData(FALSE); // Recordset 변수 값을 컨트롤에 출력
+}
+
+
+void CAssignment2View::Init() {
+	// 에디트 컨트롤을 입력 불가능한 상태로 변경
+	m_EditName.EnableWindow(0);
+	m_EidtMail.EnableWindow(0);
+	m_EditPhone.EnableWindow(0);
+	m_EditCompany.EnableWindow(0);
+	m_EditGroup.EnableWindow(0);
+
+	// 버튼을 선택 가능한 상태로 변경
+	m_ButtonTotal.EnableWindow(1);
+	m_ButtonAdd.EnableWindow(1);
+	m_ButtonMod.EnableWindow(1);
+	m_ButtonSearch.EnableWindow(1);
+	m_ButtonDel.EnableWindow(1);
+}
+
+
+void CAssignment2View::Clear() {
+	// 에디트 컨트롤을 입력 가능한 상태로 변경
+	m_EditName.EnableWindow(1);
+	m_EidtMail.EnableWindow(1);
+	m_EditPhone.EnableWindow(1);
+	m_EditCompany.EnableWindow(1);
+	m_EditGroup.EnableWindow(1);
+
+	// 버튼을 선택 불가능한 상태로 변경
+	m_ButtonTotal.EnableWindow(0);
+	m_ButtonAdd.EnableWindow(0);
+	m_ButtonMod.EnableWindow(0);
+	m_ButtonSearch.EnableWindow(0);
+	m_ButtonDel.EnableWindow(0);
+}
+
+
+void CAssignment2View::OnBnClickedButtonTotal() {
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	Init();
+	AddAllRecord();
+}
+
+
+void CAssignment2View::OnBnClickedButtonAdd() {
+	bAdd = !bAdd; 
+	if (bAdd == TRUE) { // 추가 준비 
+		m_pSet->AddNew(); // 새 레코드 추가 
+		m_pSet->SetFieldNull(NULL); // 초기화 
+		UpdateData(FALSE); 
+		Clear(); 
+		m_ButtonAdd.EnableWindow(1); 
+		m_EditName.SetFocus();
+	} 
+	else { //등록 
+		UpdateData(TRUE); // 에디트 컨트롤->Recordset 변수 
+		m_pSet->Update(); // DB 적용 
+		m_pSet->Requery(); // DB 갱신 
+
+		m_pSet->MoveLast(); 
+		GetTotalRecordCount(); // 데이터 개수 구함 
+		UpdateData(FALSE); 
+		Init(); 
+		AddAllRecord();
+	}
+}
+
+
+void CAssignment2View::OnBnClickedButtonUpdate() {
+	bUpdate = !bUpdate;
+	if (bUpdate == TRUE) { //수정 준비
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		Clear();
+		m_ButtonMod.EnableWindow(1);
+	}
+	else { // 수정
+		m_pSet->Edit(); // 수정모드로 변경...
+		UpdateData(TRUE); // 컨트롤->레코드 셋 변수로 저장
+		m_pSet->Update(); // DB 적용...
+		m_pSet->Requery(); // DB 갱신내용 가져오기
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		Init();
+		AddAllRecord();
+	}
+}
+
+
+void CAssignment2View::OnBnClickedButtonDelete() {
+	if (recordCount == 0) {
+		MessageBox(_T("삭제할 데이터가 없습니다!"));
+		return;
+	}
+	m_pSet->Delete(); // 삭제
+	m_pSet->Requery(); // 삭제
+	GetTotalRecordCount();
+	if (recordCount == 0) // 데이터가 존재하지 않으면..
+	{
+		m_pSet->SetFieldNull(NULL);
+		UpdateData(FALSE);
+		currentPos = 0;
+		return;
+	}
+	if (recordCount < currentPos) // 마지막 데이터 삭제시
+		currentPos--;// current_pos = record_count;
+	m_pSet->SetAbsolutePosition(currentPos);
+	UpdateData(FALSE);
+	AddAllRecord();
+}
+
+
+void CAssignment2View::OnBnClickedButtonSearch() {
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CAssignment2View::OnBnClickedButtonCancel() {
+	if (bAdd) { // 취소, bAdd: 추가 여부를 판단
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		bAdd = FALSE; //초기상태로 변경
+	}
+	if (bUpdate) { //bUpdate: 수정 여부를 판단
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		bUpdate = FALSE; //초기상태로 변경
+	}
+	if (bSearch) {
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		bSearch = FALSE; //초기상태로 변경
+	}
+	Init();
+}

@@ -17,7 +17,7 @@ public:
 
 // 아래의 문자열 형식(있을 경우)은 데이터베이스 필드의 실제 데이터 형식을
 // 나타냅니다(CStringA:
-ANSI 데이터 형식, CStringW: 유니코드 데이터 형식).
+//ANSI 데이터 형식, CStringW: 유니코드 데이터 형식).
 // 이것은 ODBC 드라이버에서 불필요한 변환을 수행할 수 없도록 합니다.  // 원할 경우 이들 멤버를 CString 형식으로 변환할 수 있으며
 // 그럴 경우 ODBC 드라이버에서 모든 필요한 변환을 수행합니다.
 // (참고: 유니코드와 이들 변환을 모두 지원하려면  ODBC 드라이버
@@ -25,7 +25,7 @@ ANSI 데이터 형식, CStringW: 유니코드 데이터 형식).
 
 	long	m_ID;	//이름 번호
 	CStringW	m_name;	//이름
-	CStringW	m_email;	//이메일 계정
+	CStringW	m_email;	   //이메일 계정
 	CStringW	m_phone;	//전화번호
 	CStringW	m_company;	//직장명
 	CStringW	m_group;	//( 가족 / 직장 / 학교 / 친구 / 기타 ) 중 하나
