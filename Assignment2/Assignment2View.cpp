@@ -31,6 +31,12 @@ BEGIN_MESSAGE_MAP(CAssignment2View, CRecordView)
 	ON_COMMAND(ID_RECORD_LAST, &CAssignment2View::OnRecordLast)
 	ON_COMMAND(ID_RECORD_NEXT, &CAssignment2View::OnRecordNext)
 	ON_COMMAND(ID_RECORD_PREV, &CAssignment2View::OnRecordPrev)
+	ON_BN_CLICKED(IDC_BUTTON_TOTAL, &CAssignment2View::OnBnClickedButtonTotal)
+	ON_BN_CLICKED(IDC_BUTTON_ADD, &CAssignment2View::OnBnClickedButtonAdd)
+	ON_BN_CLICKED(IDC_BUTTON_UPDATE, &CAssignment2View::OnBnClickedButtonUpdate)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CAssignment2View::OnBnClickedButtonDelete)
+	ON_BN_CLICKED(IDC_BUTTON_SEARCH, &CAssignment2View::OnBnClickedButtonSearch)
+	ON_BN_CLICKED(IDC_BUTTON_CANcEL, &CAssignment2View::OnBnClickedButtonCancel)
 END_MESSAGE_MAP()
 
 // CAssignment2View 생성/소멸
@@ -42,6 +48,10 @@ CAssignment2View::CAssignment2View()
 	// TODO: 여기에 생성 코드를 추가합니다.
 	currentPos = 1;
 	recordCount = 0;
+
+	bAdd = FALSE;
+	bUpdate = FALSE;
+	bSearch = FALSE;
 }
 
 CAssignment2View::~CAssignment2View()
@@ -243,4 +253,142 @@ void CAssignment2View::OnRecordPrev() {
 		currentPos = 1;
 	}
 	UpdateData(FALSE); // Recordset 변수 값을 컨트롤에 출력
+}
+
+
+void CAssignment2View::Init() {
+	// 에디트 컨트롤을 입력 불가능한 상태로 변경
+	m_EditName.EnableWindow(0);
+	m_EidtMail.EnableWindow(0);
+	m_EditPhone.EnableWindow(0);
+	m_EditCompany.EnableWindow(0);
+	m_EditGroup.EnableWindow(0);
+
+	// 버튼을 선택 가능한 상태로 변경
+	m_ButtonTotal.EnableWindow(1);
+	m_ButtonAdd.EnableWindow(1);
+	m_ButtonMod.EnableWindow(1);
+	m_ButtonSearch.EnableWindow(1);
+	m_ButtonDel.EnableWindow(1);
+}
+
+
+void CAssignment2View::Clear() {
+	// 에디트 컨트롤을 입력 가능한 상태로 변경
+	m_EditName.EnableWindow(1);
+	m_EidtMail.EnableWindow(1);
+	m_EditPhone.EnableWindow(1);
+	m_EditCompany.EnableWindow(1);
+	m_EditGroup.EnableWindow(1);
+
+	// 버튼을 선택 불가능한 상태로 변경
+	m_ButtonTotal.EnableWindow(0);
+	m_ButtonAdd.EnableWindow(0);
+	m_ButtonMod.EnableWindow(0);
+	m_ButtonSearch.EnableWindow(0);
+	m_ButtonDel.EnableWindow(0);
+}
+
+
+void CAssignment2View::OnBnClickedButtonTotal() {
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	Init();
+	AddAllRecord();
+}
+
+
+void CAssignment2View::OnBnClickedButtonAdd() {
+	bAdd = !bAdd; 
+	if (bAdd == TRUE) { // 추가 준비 
+		m_pSet->AddNew(); // 새 레코드 추가 
+		m_pSet->SetFieldNull(NULL); // 초기화 
+		UpdateData(FALSE); 
+		Clear(); 
+		m_ButtonAdd.EnableWindow(1); 
+		m_EditName.SetFocus();
+	} 
+	else { //등록 
+		UpdateData(TRUE); // 에디트 컨트롤->Recordset 변수 
+		m_pSet->Update(); // DB 적용 
+		m_pSet->Requery(); // DB 갱신 
+
+		m_pSet->MoveLast(); 
+		GetTotalRecordCount(); // 데이터 개수 구함 
+		UpdateData(FALSE); 
+		Init(); 
+		AddAllRecord();
+	}
+}
+
+
+void CAssignment2View::OnBnClickedButtonUpdate() {
+	bUpdate = !bUpdate;
+	if (bUpdate == TRUE) { //수정 준비
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		Clear();
+		m_ButtonMod.EnableWindow(1);
+	}
+	else { // 수정
+		m_pSet->Edit(); // 수정모드로 변경...
+		UpdateData(TRUE); // 컨트롤->레코드 셋 변수로 저장
+		m_pSet->Update(); // DB 적용...
+		m_pSet->Requery(); // DB 갱신내용 가져오기
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		Init();
+		AddAllRecord();
+	}
+}
+
+
+void CAssignment2View::OnBnClickedButtonDelete() {
+	if (recordCount == 0) {
+		MessageBox(_T("삭제할 데이터가 없습니다!"));
+		return;
+	}
+	m_pSet->Delete(); // 삭제
+	m_pSet->Requery(); // 삭제
+	GetTotalRecordCount();
+	if (recordCount == 0) // 데이터가 존재하지 않으면..
+	{
+		m_pSet->SetFieldNull(NULL);
+		UpdateData(FALSE);
+		currentPos = 0;
+		return;
+	}
+	if (recordCount < currentPos) // 마지막 데이터 삭제시
+		currentPos--;// current_pos = record_count;
+	m_pSet->SetAbsolutePosition(currentPos);
+	UpdateData(FALSE);
+	AddAllRecord();
+}
+
+
+void CAssignment2View::OnBnClickedButtonSearch() {
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CAssignment2View::OnBnClickedButtonCancel() {
+	if (bAdd) { // 취소, bAdd: 추가 여부를 판단
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		bAdd = FALSE; //초기상태로 변경
+	}
+	if (bUpdate) { //bUpdate: 수정 여부를 판단
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		bUpdate = FALSE; //초기상태로 변경
+	}
+	if (bSearch) {
+		//이전 레코드 위치로 이동
+		m_pSet->SetAbsolutePosition(currentPos);
+		UpdateData(FALSE);
+		bSearch = FALSE; //초기상태로 변경
+	}
+	Init();
 }

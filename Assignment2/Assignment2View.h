@@ -70,6 +70,10 @@ public:
 	int currentPos;
 	int recordCount;
 
+	BOOL bAdd;
+	BOOL bUpdate;
+	BOOL bSearch;
+
 	void AddColumn();
 	void SetImageList();
 	void AddAllRecord();
@@ -78,6 +82,15 @@ public:
 	afx_msg void OnRecordLast();
 	afx_msg void OnRecordNext();
 	afx_msg void OnRecordPrev();
+
+	void Init();
+	void Clear();
+	afx_msg void OnBnClickedButtonTotal();
+	afx_msg void OnBnClickedButtonAdd();
+	afx_msg void OnBnClickedButtonUpdate();
+	afx_msg void OnBnClickedButtonDelete();
+	afx_msg void OnBnClickedButtonSearch();
+	afx_msg void OnBnClickedButtonCancel();
 };
 
 #ifndef _DEBUG  // Assignment2View.cpp의 디버그 버전
