@@ -27,6 +27,10 @@ BEGIN_MESSAGE_MAP(CAssignment2View, CRecordView)
 	ON_COMMAND(ID_FILE_PRINT, &CRecordView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CRecordView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CRecordView::OnFilePrintPreview)
+	ON_COMMAND(ID_RECORD_FIRST, &CAssignment2View::OnRecordFirst)
+	ON_COMMAND(ID_RECORD_LAST, &CAssignment2View::OnRecordLast)
+	ON_COMMAND(ID_RECORD_NEXT, &CAssignment2View::OnRecordNext)
+	ON_COMMAND(ID_RECORD_PREV, &CAssignment2View::OnRecordPrev)
 END_MESSAGE_MAP()
 
 // CAssignment2View 생성/소멸
@@ -36,7 +40,8 @@ CAssignment2View::CAssignment2View()
 {
 	m_pSet = NULL;
 	// TODO: 여기에 생성 코드를 추가합니다.
-
+	currentPos = 1;
+	recordCount = 0;
 }
 
 CAssignment2View::~CAssignment2View()
@@ -90,7 +95,7 @@ void CAssignment2View::OnInitialUpdate()
 	AddColumn();
 	SetImageList();
 	AddAllRecord();
-
+	GetTotalRecordCount();
 }
 
 
@@ -189,3 +194,53 @@ void CAssignment2View::AddAllRecord() {
 	rsSet.Close();
 }
 
+
+
+void CAssignment2View::GetTotalRecordCount() {
+	CRecordset cntSet(m_pSet->m_pDatabase); 
+	cntSet.Open(CRecordset::dynaset, _T("select count(*) from address")); // 전체 레코드의 개수를 구함 
+	CString strCount; 
+	cntSet.GetFieldValue((short)0,strCount); 
+	recordCount = atoi((char *)(const wchar_t *)strCount); 
+	cntSet.Close();
+}
+
+
+void CAssignment2View::OnRecordFirst() {
+	if (recordCount == 0) return; 
+	currentPos = 1; // 현재 위치값을 1로 지정 
+	m_pSet->MoveFirst(); // 첫 번째 레코드로 이동 
+	UpdateData(FALSE); // Recordset 변수 값을 컨트롤에 출력
+}
+
+
+void CAssignment2View::OnRecordLast() {
+	if (recordCount == 0) return; 
+	currentPos = recordCount; // 현재 위치 값을 전체 레코드 수 지정 
+	m_pSet->MoveLast(); // 마지막 레코드로 이동 
+	UpdateData(FALSE);
+}
+
+
+void CAssignment2View::OnRecordNext() {
+	if (recordCount == 0)return;
+	currentPos++; // 현재 위치 값을 1증가시킴
+	m_pSet->MoveNext(); // 다음 레코드 위치로 이동
+	if (m_pSet->IsEOF()) {
+		m_pSet->MoveLast();
+		currentPos--;
+	}
+	UpdateData(FALSE);
+}
+
+
+void CAssignment2View::OnRecordPrev() {
+	if (recordCount == 0) return;
+	currentPos--; // 현재 위치 값을 1감소시킴
+	m_pSet->MovePrev(); // 이전 레코드 위치로 이동
+	if (m_pSet->IsBOF()) {
+		m_pSet->MoveFirst();
+		currentPos = 1;
+	}
+	UpdateData(FALSE); // Recordset 변수 값을 컨트롤에 출력
+}

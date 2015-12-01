@@ -67,9 +67,17 @@ public:
 	CButton m_ButtonDel;
 	CButton m_ButtonSearch;
 
+	int currentPos;
+	int recordCount;
+
 	void AddColumn();
 	void SetImageList();
 	void AddAllRecord();
+	void GetTotalRecordCount();
+	afx_msg void OnRecordFirst();
+	afx_msg void OnRecordLast();
+	afx_msg void OnRecordNext();
+	afx_msg void OnRecordPrev();
 };
 
 #ifndef _DEBUG  // Assignment2View.cpp의 디버그 버전
