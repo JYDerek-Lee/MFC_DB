@@ -50,6 +50,28 @@ void CAssignment2View::DoDataExchange(CDataExchange* pDX)
 	// DDX_FieldText(pDX, IDC_MYEDITBOX, m_pSet->m_szColumn1, m_pSet);
 	// DDX_FieldCheck(pDX, IDC_MYCHECKBOX, m_pSet->m_bColumn2, m_pSet);
 	// 자세한 내용은 MSDN 및 ODBC 샘플을 참조하십시오.
+
+	DDX_Control(pDX, IDC_LIST1, m_List);
+
+	DDX_Control(pDX, IDC_EDIT_NAME, m_EditName);
+	DDX_Control(pDX, IDC_EDIT_EMAIL, m_EidtMail);
+	DDX_Control(pDX, IDC_EDIT_PHONE, m_EditPhone);
+	DDX_Control(pDX, IDC_EDIT_COMPANY, m_EditCompany);
+	DDX_Control(pDX, IDC_EDIT_GROUP, m_EditGroup);
+
+	DDX_Control(pDX, IDC_BUTTON_TOTAL, m_ButtonTotal);
+	DDX_Control(pDX, IDC_BUTTON_ADD, m_ButtonAdd);
+	DDX_Control(pDX, IDC_BUTTON_UPDATE, m_ButtonMod);
+	DDX_Control(pDX, IDC_BUTTON_DELETE, m_ButtonDel);
+	DDX_Control(pDX, IDC_BUTTON_SEARCH, m_ButtonSearch);
+
+	// 컨트롤을 데이터 베이스 필드에 연결
+	DDX_FieldText(pDX, IDC_EDIT_NAME, m_pSet->m_name, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_EMAIL, m_pSet->m_email, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_PHONE, m_pSet->m_phone, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_COMPANY, m_pSet->m_company, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_GROUP, m_pSet->m_group, m_pSet);
+
 }
 
 BOOL CAssignment2View::PreCreateWindow(CREATESTRUCT& cs)
@@ -64,6 +86,10 @@ void CAssignment2View::OnInitialUpdate()
 {
 	m_pSet = &GetDocument()->m_Assignment2Set;
 	CRecordView::OnInitialUpdate();
+
+	AddColumn();
+	SetImageList();
+	AddAllRecord();
 
 }
 
@@ -117,3 +143,49 @@ CRecordset* CAssignment2View::OnGetRecordset()
 
 
 // CAssignment2View 메시지 처리기
+void CAssignment2View::AddColumn() {
+	CRect rect;
+	// 리스트 컨트롤의 크기를 얻어온다.
+	m_List.GetClientRect(&rect);
+	// 컬럼추가
+	m_List.InsertColumn(0, _T("이름"), LVCFMT_RIGHT, 100);
+	m_List.InsertColumn(1, _T("이메일 계정"), LVCFMT_LEFT, rect.Width() - 400);
+	m_List.InsertColumn(2, _T("전화번호"), LVCFMT_LEFT, 100);
+	m_List.InsertColumn(3, _T("직장명"), LVCFMT_LEFT, 100);
+	m_List.InsertColumn(4, _T("그룹"), LVCFMT_LEFT, 100);
+}
+
+
+void CAssignment2View::SetImageList() {
+	m_LargeImageList.Create(IDB_BITMAP_LARGE, 48, 1, RGB(0, 0, 0));
+	m_SmallImageList.Create(IDB_BITMAP_SMALL, 16, 1, RGB(0, 0, 0));
+	m_List.SetImageList(&m_LargeImageList, LVSIL_NORMAL);
+	m_List.SetImageList(&m_SmallImageList, LVSIL_SMALL);
+}
+
+
+void CAssignment2View::AddAllRecord() {
+	int i = 0;
+	CString strTemp;
+	
+	CAssignment2Set rsSet(m_pSet->m_pDatabase);
+	rsSet.Open(CRecordset::dynaset, _T("select * from address"));
+	m_List.DeleteAllItems();
+
+	while (rsSet.IsEOF() == FALSE) {
+		strTemp.Format(_T("%4d"), rsSet.m_ID);
+		m_List.InsertItem(i, strTemp, 0);
+		m_List.SetItemText(i, 1, rsSet.m_name);
+		m_List.SetItemText(i, 2, rsSet.m_email);
+		m_List.SetItemText(i, 3, rsSet.m_phone);
+		m_List.SetItemText(i, 4, rsSet.m_company);
+		m_List.SetItemText(i, 5, rsSet.m_group);
+
+		//strTemp.Format(_T("%4ld"), rsSet.m_price);
+		//m_List.SetItemText(i, 3, strTemp);
+		rsSet.MoveNext();
+		i++;
+	}
+	rsSet.Close();
+}
+

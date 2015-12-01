@@ -29,7 +29,7 @@ CAssignment2Set::CAssignment2Set(CDatabase* pdb)
 	m_nFields = 6;
 	m_nDefaultType = dynaset;
 }
-#error 보안 문제: 연결 문자열에 암호가 포함되어 있을 수 있습니다.
+//#error 보안 문제: 연결 문자열에 암호가 포함되어 있을 수 있습니다.
 // 아래 연결 문자열에 일반 텍스트 암호 및/또는 
 // 다른 중요한 정보가 포함되어 있을 수 있습니다.
 // 보안 관련 문제가 있는지 연결 문자열을 검토한 후에 #error을(를) 제거하십시오.

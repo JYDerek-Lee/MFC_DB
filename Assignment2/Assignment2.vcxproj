@@ -130,6 +130,8 @@
     <None Include="res\Assignment2.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\res\bitmap_Big.bmp" />
+    <Image Include="..\res\bitmap_Small.bmp" />
     <Image Include="res\Assignment2.ico" />
     <Image Include="res\Assignment2Doc.ico" />
     <Image Include="res\Toolbar.bmp" />
@@ -137,4 +139,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="Assignment2.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
