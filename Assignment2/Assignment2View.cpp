@@ -37,6 +37,10 @@ BEGIN_MESSAGE_MAP(CAssignment2View, CRecordView)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CAssignment2View::OnBnClickedButtonDelete)
 	ON_BN_CLICKED(IDC_BUTTON_SEARCH, &CAssignment2View::OnBnClickedButtonSearch)
 	ON_BN_CLICKED(IDC_BUTTON_CANcEL, &CAssignment2View::OnBnClickedButtonCancel)
+	ON_COMMAND(ID_ICON, &CAssignment2View::OnIcon)
+	ON_COMMAND(ID_SMALL_ICON, &CAssignment2View::OnSmallIcon)
+	ON_COMMAND(ID_LIST, &CAssignment2View::OnList)
+	ON_COMMAND(ID_REPORT, &CAssignment2View::OnReport)
 END_MESSAGE_MAP()
 
 // CAssignment2View 생성/소멸
@@ -163,17 +167,18 @@ void CAssignment2View::AddColumn() {
 	// 리스트 컨트롤의 크기를 얻어온다.
 	m_List.GetClientRect(&rect);
 	// 컬럼추가
+	//m_List.InsertColumn(0, _T("번호"), LVCFMT_RIGHT, 100);
 	m_List.InsertColumn(0, _T("이름"), LVCFMT_RIGHT, 100);
-	m_List.InsertColumn(1, _T("이메일 계정"), LVCFMT_LEFT, rect.Width() - 400);
-	m_List.InsertColumn(2, _T("전화번호"), LVCFMT_LEFT, 100);
-	m_List.InsertColumn(3, _T("직장명"), LVCFMT_LEFT, 100);
-	m_List.InsertColumn(4, _T("그룹"), LVCFMT_LEFT, 100);
+	m_List.InsertColumn(1, _T("이메일 계정"), LVCFMT_RIGHT, rect.Width() - 400);
+	m_List.InsertColumn(2, _T("전화번호"), LVCFMT_RIGHT, 100);
+	m_List.InsertColumn(3, _T("직장명"), LVCFMT_RIGHT, 100);
+	m_List.InsertColumn(4, _T("그룹"), LVCFMT_RIGHT, 100);
 }
 
 
 void CAssignment2View::SetImageList() {
-	m_LargeImageList.Create(IDB_BITMAP_LARGE, 48, 1, RGB(0, 0, 0));
-	m_SmallImageList.Create(IDB_BITMAP_SMALL, 16, 1, RGB(0, 0, 0));
+	m_LargeImageList.Create(IDB_BITMAP_LARGE, 48, 1, RGB(255, 255, 255));
+	m_SmallImageList.Create(IDB_BITMAP_SMALL, 16, 1, RGB(255, 255, 255));
 	m_List.SetImageList(&m_LargeImageList, LVSIL_NORMAL);
 	m_List.SetImageList(&m_SmallImageList, LVSIL_SMALL);
 }
@@ -188,13 +193,15 @@ void CAssignment2View::AddAllRecord() {
 	m_List.DeleteAllItems();
 
 	while (rsSet.IsEOF() == FALSE) {
-		strTemp.Format(_T("%4d"), rsSet.m_ID);
-		m_List.InsertItem(i, strTemp, 0);
-		m_List.SetItemText(i, 1, rsSet.m_name);
-		m_List.SetItemText(i, 2, rsSet.m_email);
-		m_List.SetItemText(i, 3, rsSet.m_phone);
-		m_List.SetItemText(i, 4, rsSet.m_company);
-		m_List.SetItemText(i, 5, rsSet.m_group);
+		//strTemp.Format(_T("%4d"), rsSet.m_ID);
+		//m_List.InsertItem(i, strTemp, 0);
+		//m_List.SetItemText(i, 1, rsSet.m_name);
+
+		m_List.InsertItem(i, rsSet.m_name, 0);
+		m_List.SetItemText(i, 1, rsSet.m_email);
+		m_List.SetItemText(i, 2, rsSet.m_phone);
+		m_List.SetItemText(i, 3, rsSet.m_company);
+		m_List.SetItemText(i, 4, rsSet.m_group);
 
 		//strTemp.Format(_T("%4ld"), rsSet.m_price);
 		//m_List.SetItemText(i, 3, strTemp);
@@ -359,7 +366,7 @@ void CAssignment2View::OnBnClickedButtonDelete() {
 		return;
 	}
 	if (recordCount < currentPos) // 마지막 데이터 삭제시
-		currentPos--;// current_pos = record_count;
+		currentPos--; // current_pos = record_count;
 	m_pSet->SetAbsolutePosition(currentPos);
 	UpdateData(FALSE);
 	AddAllRecord();
@@ -391,4 +398,28 @@ void CAssignment2View::OnBnClickedButtonCancel() {
 		bSearch = FALSE; //초기상태로 변경
 	}
 	Init();
+}
+
+
+void CAssignment2View::OnIcon() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_ICON);
+	//AddColumn();
+	//SetImageList();
+	//AddAllRecord();
+	//GetTotalRecordCount();
+}
+
+
+void CAssignment2View::OnSmallIcon() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_SMALLICON);
+}
+
+
+void CAssignment2View::OnList() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_LIST);
+}
+
+
+void CAssignment2View::OnReport() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
 }

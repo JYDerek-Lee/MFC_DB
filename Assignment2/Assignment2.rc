@@ -89,7 +89,6 @@ IDB_BITMAP_SMALL        BITMAP                  "D:\\0.Git\\MFC_DB\\res\\bitmap_
 
 IDR_MAINFRAME TOOLBAR 16, 15
 BEGIN
-    BUTTON      ID_EDIT_CUT
     BUTTON      ID_EDIT_COPY
     BUTTON      ID_EDIT_PASTE
     SEPARATOR
@@ -101,6 +100,11 @@ BEGIN
     BUTTON      ID_RECORD_LAST
     SEPARATOR
     BUTTON      ID_APP_ABOUT
+    SEPARATOR
+    BUTTON      ID_ICON
+    BUTTON      ID_SMALL_ICON
+    BUTTON      ID_LIST
+    BUTTON      ID_REPORT
 END
 
 
@@ -142,6 +146,13 @@ BEGIN
     POPUP "도움말(&H)"
     BEGIN
         MENUITEM "Assignment2 정보(&A)...",       ID_APP_ABOUT
+    END
+    POPUP "스타일"
+    BEGIN
+        MENUITEM "아이콘",                         ID_ICON
+        MENUITEM "작은 아이콘",                      ID_SMALL_ICON
+        MENUITEM "목록",                          ID_LIST
+        MENUITEM "보고서",                         ID_REPORT
     END
 END
 

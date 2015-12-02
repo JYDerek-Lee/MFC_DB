@@ -91,6 +91,10 @@ public:
 	afx_msg void OnBnClickedButtonDelete();
 	afx_msg void OnBnClickedButtonSearch();
 	afx_msg void OnBnClickedButtonCancel();
+	afx_msg void OnIcon();
+	afx_msg void OnSmallIcon();
+	afx_msg void OnList();
+	afx_msg void OnReport();
 };
 
 #ifndef _DEBUG  // Assignment2View.cpp의 디버그 버전
