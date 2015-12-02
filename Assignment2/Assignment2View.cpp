@@ -374,7 +374,44 @@ void CAssignment2View::OnBnClickedButtonDelete() {
 
 
 void CAssignment2View::OnBnClickedButtonSearch() {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	bSearch = !bSearch; 
+	if (bSearch) { //검색 준비 
+		m_EditName.SetWindowTextW(_T(""));
+		m_EidtMail.SetWindowTextW(_T(""));
+		m_EditPhone.SetWindowTextW(_T(""));
+		m_EditCompany.SetWindowTextW(_T(""));
+		m_EditGroup.SetWindowTextW(_T(""));
+		Clear();
+
+		m_EidtMail.EnableWindow(0);
+		m_EditPhone.EnableWindow(0);
+		m_EditCompany.EnableWindow(0);
+		m_EditGroup.EnableWindow(0);
+		m_ButtonSearch.EnableWindow(1);
+		m_EditName.SetFocus(); 
+	} 
+	else { //검색 
+		UpdateData(TRUE); 
+		m_pSet->m_strFilter.Format(_T(" name like '%%%s%%'"), m_pSet->m_name);
+		if (m_pSet->m_name.IsEmpty() == false) {
+			int i = 0;
+			m_pSet->Requery(); m_pSet->m_strFilter.Empty();
+			m_List.DeleteAllItems();
+
+			CString strTemp;
+			while (m_pSet->IsEOF() == FALSE) {
+				m_List.InsertItem(i, m_pSet->m_name, 0);
+				m_List.SetItemText(i, 1, m_pSet->m_email);
+				m_List.SetItemText(i, 2, m_pSet->m_phone);
+				m_List.SetItemText(i, 3, m_pSet->m_company);
+				m_List.SetItemText(i, 4, m_pSet->m_group);
+				m_pSet->MoveNext(); 
+				i++;
+			}
+			// rsSet.Close();
+			Init();
+		}
+	}
 }
 
 
