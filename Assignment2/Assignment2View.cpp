@@ -108,6 +108,12 @@ void CAssignment2View::OnInitialUpdate()
 	m_pSet = &GetDocument()->m_Assignment2Set;
 	CRecordView::OnInitialUpdate();
 
+	m_List2.AddString(_T("가족"));
+	m_List2.AddString(_T("직장"));
+	m_List2.AddString(_T("학교"));
+	m_List2.AddString(_T("친구"));
+	m_List2.AddString(_T("기타"));
+
 	AddColumn();
 	SetImageList();
 	AddAllRecord();
@@ -194,11 +200,7 @@ void CAssignment2View::AddAllRecord() {
 	rsSet.Open(CRecordset::dynaset, _T("select * from address"));
 	m_List.DeleteAllItems();
 
-	m_List2.AddString(_T("가족"));
-	m_List2.AddString(_T("직장"));
-	m_List2.AddString(_T("학교"));
-	m_List2.AddString(_T("친구"));
-	m_List2.AddString(_T("기타"));
+
 
 	while (rsSet.IsEOF() == FALSE) {
 		//strTemp.Format(_T("%4d"), rsSet.m_ID);
@@ -493,6 +495,6 @@ void CAssignment2View::OnLbnSelchangeList2() {
 			m_pSet->MoveNext();
 			i++;
 		}
-		Init();
+		//Init();
 	}
 }
