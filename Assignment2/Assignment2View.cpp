@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CAssignment2View, CRecordView)
 	ON_COMMAND(ID_SMALL_ICON, &CAssignment2View::OnSmallIcon)
 	ON_COMMAND(ID_LIST, &CAssignment2View::OnList)
 	ON_COMMAND(ID_REPORT, &CAssignment2View::OnReport)
+	ON_LBN_SELCHANGE(IDC_LIST2, &CAssignment2View::OnLbnSelchangeList2)
 END_MESSAGE_MAP()
 
 // CAssignment2View 생성/소멸
@@ -89,8 +90,9 @@ void CAssignment2View::DoDataExchange(CDataExchange* pDX)
 	DDX_FieldText(pDX, IDC_EDIT_EMAIL, m_pSet->m_email, m_pSet);
 	DDX_FieldText(pDX, IDC_EDIT_PHONE, m_pSet->m_phone, m_pSet);
 	DDX_FieldText(pDX, IDC_EDIT_COMPANY, m_pSet->m_company, m_pSet);
-	DDX_FieldText(pDX, IDC_EDIT_GROUP, m_pSet->m_group, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_GROUP, m_pSet->m_groups, m_pSet);
 
+	DDX_Control(pDX, IDC_LIST2, m_List2);
 }
 
 BOOL CAssignment2View::PreCreateWindow(CREATESTRUCT& cs)
@@ -192,6 +194,12 @@ void CAssignment2View::AddAllRecord() {
 	rsSet.Open(CRecordset::dynaset, _T("select * from address"));
 	m_List.DeleteAllItems();
 
+	m_List2.AddString(_T("가족"));
+	m_List2.AddString(_T("직장"));
+	m_List2.AddString(_T("학교"));
+	m_List2.AddString(_T("친구"));
+	m_List2.AddString(_T("기타"));
+
 	while (rsSet.IsEOF() == FALSE) {
 		//strTemp.Format(_T("%4d"), rsSet.m_ID);
 		//m_List.InsertItem(i, strTemp, 0);
@@ -201,7 +209,7 @@ void CAssignment2View::AddAllRecord() {
 		m_List.SetItemText(i, 1, rsSet.m_email);
 		m_List.SetItemText(i, 2, rsSet.m_phone);
 		m_List.SetItemText(i, 3, rsSet.m_company);
-		m_List.SetItemText(i, 4, rsSet.m_group);
+		m_List.SetItemText(i, 4, rsSet.m_groups);
 
 		//strTemp.Format(_T("%4ld"), rsSet.m_price);
 		//m_List.SetItemText(i, 3, strTemp);
@@ -392,19 +400,18 @@ void CAssignment2View::OnBnClickedButtonSearch() {
 	} 
 	else { //검색 
 		UpdateData(TRUE); 
-		m_pSet->m_strFilter.Format(_T(" name like '%%%s%%'"), m_pSet->m_name);
+		m_pSet->m_strFilter.Format(_T("name like '%%%s%%'"), m_pSet->m_name);
 		if (m_pSet->m_name.IsEmpty() == false) {
 			int i = 0;
 			m_pSet->Requery(); m_pSet->m_strFilter.Empty();
 			m_List.DeleteAllItems();
 
-			CString strTemp;
 			while (m_pSet->IsEOF() == FALSE) {
 				m_List.InsertItem(i, m_pSet->m_name, 0);
 				m_List.SetItemText(i, 1, m_pSet->m_email);
 				m_List.SetItemText(i, 2, m_pSet->m_phone);
 				m_List.SetItemText(i, 3, m_pSet->m_company);
-				m_List.SetItemText(i, 4, m_pSet->m_group);
+				m_List.SetItemText(i, 4, m_pSet->m_groups);
 				m_pSet->MoveNext(); 
 				i++;
 			}
@@ -459,4 +466,33 @@ void CAssignment2View::OnList() {
 
 void CAssignment2View::OnReport() {
 	m_List.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+}
+
+
+void CAssignment2View::OnLbnSelchangeList2() {
+	CString Item;
+	int nIndex = m_List2.GetCurSel();
+
+	if (nIndex != LB_ERR) m_List2.GetText(nIndex, Item);
+
+	UpdateData(TRUE);
+	m_pSet->m_strFilter.Format(_T("groups like '%%%s%%'"), Item);
+	//m_pSet->m_strFilter.Format(_T("group like '%s'"), Item);
+	if (m_pSet->m_groups.IsEmpty() == false) {
+		int i = 0;
+		m_pSet->Requery(); 
+		m_pSet->m_strFilter.Empty();
+		m_List.DeleteAllItems();
+
+		while (m_pSet->IsEOF() == FALSE) {
+			m_List.InsertItem(i, m_pSet->m_name, 0);
+			m_List.SetItemText(i, 1, m_pSet->m_email);
+			m_List.SetItemText(i, 2, m_pSet->m_phone);
+			m_List.SetItemText(i, 3, m_pSet->m_company);
+			m_List.SetItemText(i, 4, m_pSet->m_groups);
+			m_pSet->MoveNext();
+			i++;
+		}
+		Init();
+	}
 }
