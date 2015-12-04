@@ -97,6 +97,7 @@ public:
 	afx_msg void OnReport();
 	afx_msg void OnLbnSelchangeList2();
 	CListBox m_List2;
+	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 #ifndef _DEBUG  // Assignment2View.cpp의 디버그 버전

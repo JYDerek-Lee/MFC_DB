@@ -42,6 +42,7 @@ BEGIN_MESSAGE_MAP(CAssignment2View, CRecordView)
 	ON_COMMAND(ID_LIST, &CAssignment2View::OnList)
 	ON_COMMAND(ID_REPORT, &CAssignment2View::OnReport)
 	ON_LBN_SELCHANGE(IDC_LIST2, &CAssignment2View::OnLbnSelchangeList2)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CAssignment2View::OnLvnItemchangedList1)
 END_MESSAGE_MAP()
 
 // CAssignment2View 생성/소멸
@@ -199,8 +200,6 @@ void CAssignment2View::AddAllRecord() {
 	CAssignment2Set rsSet(m_pSet->m_pDatabase);
 	rsSet.Open(CRecordset::dynaset, _T("select * from address"));
 	m_List.DeleteAllItems();
-
-
 
 	while (rsSet.IsEOF() == FALSE) {
 		//strTemp.Format(_T("%4d"), rsSet.m_ID);
@@ -480,7 +479,7 @@ void CAssignment2View::OnLbnSelchangeList2() {
 	UpdateData(TRUE);
 	m_pSet->m_strFilter.Format(_T("groups like '%%%s%%'"), Item);
 	//m_pSet->m_strFilter.Format(_T("group like '%s'"), Item);
-	if (m_pSet->m_groups.IsEmpty() == false) {
+	//if (m_pSet->m_groups.IsEmpty() == false) {
 		int i = 0;
 		m_pSet->Requery(); 
 		m_pSet->m_strFilter.Empty();
@@ -496,5 +495,32 @@ void CAssignment2View::OnLbnSelchangeList2() {
 			i++;
 		}
 		//Init();
-	}
+	//}
+}
+
+
+void CAssignment2View::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult) {
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int nItem = pNMLV->iItem; //선택된 항목의 행의 위치 값을 얻어옵니다.
+
+	currentPos = nItem + 1;
+	m_pSet->SetAbsolutePosition(currentPos);
+
+	CString strID, sql;
+	strID = m_List.GetItemText(nItem, 0); //선택된 도서번호를 얻어와
+	sql.Format(_T("select * from address where name='%s'"), strID); //도서번호로 검색
+	
+	//m_pSet->Requery(); m_pSet->m_strFilter.Empty();
+
+	CAssignment2Set rsSet(m_pSet->m_pDatabase);
+	rsSet.Open(CRecordset::dynaset, sql);
+
+	m_EditName.SetWindowTextW(rsSet.m_name); //제목을 얻어 와서 출력
+	m_EidtMail.SetWindowTextW(rsSet.m_email); //제목을 얻어 와서 출력
+	m_EditPhone.SetWindowTextW(rsSet.m_phone); //제목을 얻어 와서 출력
+	m_EditCompany.SetWindowTextW(rsSet.m_company); //제목을 얻어 와서 출력
+	m_EditGroup.SetWindowTextW(rsSet.m_groups); //제목을 얻어 와서 출력
+
+	*pResult = 0;
 }
