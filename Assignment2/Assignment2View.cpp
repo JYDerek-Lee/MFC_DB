@@ -202,18 +202,11 @@ void CAssignment2View::AddAllRecord() {
 	m_List.DeleteAllItems();
 
 	while (rsSet.IsEOF() == FALSE) {
-		//strTemp.Format(_T("%4d"), rsSet.m_ID);
-		//m_List.InsertItem(i, strTemp, 0);
-		//m_List.SetItemText(i, 1, rsSet.m_name);
-
 		m_List.InsertItem(i, rsSet.m_name, 0);
 		m_List.SetItemText(i, 1, rsSet.m_email);
 		m_List.SetItemText(i, 2, rsSet.m_phone);
 		m_List.SetItemText(i, 3, rsSet.m_company);
 		m_List.SetItemText(i, 4, rsSet.m_groups);
-
-		//strTemp.Format(_T("%4ld"), rsSet.m_price);
-		//m_List.SetItemText(i, 3, strTemp);
 		rsSet.MoveNext();
 		i++;
 	}
@@ -448,10 +441,6 @@ void CAssignment2View::OnBnClickedButtonCancel() {
 
 void CAssignment2View::OnIcon() {
 	m_List.ModifyStyle(LVS_TYPEMASK, LVS_ICON);
-	//AddColumn();
-	//SetImageList();
-	//AddAllRecord();
-	//GetTotalRecordCount();
 }
 
 
@@ -478,24 +467,20 @@ void CAssignment2View::OnLbnSelchangeList2() {
 
 	UpdateData(TRUE);
 	m_pSet->m_strFilter.Format(_T("groups like '%%%s%%'"), Item);
-	//m_pSet->m_strFilter.Format(_T("group like '%s'"), Item);
-	//if (m_pSet->m_groups.IsEmpty() == false) {
-		int i = 0;
-		m_pSet->Requery(); 
-		m_pSet->m_strFilter.Empty();
-		m_List.DeleteAllItems();
+	int i = 0;
+	m_pSet->Requery(); 
+	m_pSet->m_strFilter.Empty();
+	m_List.DeleteAllItems();
 
-		while (m_pSet->IsEOF() == FALSE) {
-			m_List.InsertItem(i, m_pSet->m_name, 0);
-			m_List.SetItemText(i, 1, m_pSet->m_email);
-			m_List.SetItemText(i, 2, m_pSet->m_phone);
-			m_List.SetItemText(i, 3, m_pSet->m_company);
-			m_List.SetItemText(i, 4, m_pSet->m_groups);
-			m_pSet->MoveNext();
-			i++;
-		}
-		//Init();
-	//}
+	while (m_pSet->IsEOF() == FALSE) {
+		m_List.InsertItem(i, m_pSet->m_name, 0);
+		m_List.SetItemText(i, 1, m_pSet->m_email);
+		m_List.SetItemText(i, 2, m_pSet->m_phone);
+		m_List.SetItemText(i, 3, m_pSet->m_company);
+		m_List.SetItemText(i, 4, m_pSet->m_groups);
+		m_pSet->MoveNext();
+		i++;
+	}
 }
 
 
@@ -511,8 +496,6 @@ void CAssignment2View::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult) {
 	strID = m_List.GetItemText(nItem, 0); //선택된 도서번호를 얻어와
 	sql.Format(_T("select * from address where name='%s'"), strID); //도서번호로 검색
 	
-	//m_pSet->Requery(); m_pSet->m_strFilter.Empty();
-
 	CAssignment2Set rsSet(m_pSet->m_pDatabase);
 	rsSet.Open(CRecordset::dynaset, sql);
 
