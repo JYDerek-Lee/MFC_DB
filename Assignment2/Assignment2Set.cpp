@@ -25,7 +25,7 @@ CAssignment2Set::CAssignment2Set(CDatabase* pdb)
 	m_email = L"";
 	m_phone = L"";
 	m_company = L"";
-	m_group = L"";
+	m_groups = L"";
 	m_nFields = 6;
 	m_nDefaultType = dynaset;
 }
@@ -55,7 +55,7 @@ void CAssignment2Set::DoFieldExchange(CFieldExchange* pFX)
 	RFX_Text(pFX, _T("[email]"), m_email);
 	RFX_Text(pFX, _T("[phone]"), m_phone);
 	RFX_Text(pFX, _T("[company]"), m_company);
-	RFX_Text(pFX, _T("[group]"), m_group);
+	RFX_Text(pFX, _T("[groups]"), m_groups);
 
 }
 /////////////////////////////////////////////////////////////////////////////

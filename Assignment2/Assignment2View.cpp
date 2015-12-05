@@ -37,6 +37,12 @@ BEGIN_MESSAGE_MAP(CAssignment2View, CRecordView)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CAssignment2View::OnBnClickedButtonDelete)
 	ON_BN_CLICKED(IDC_BUTTON_SEARCH, &CAssignment2View::OnBnClickedButtonSearch)
 	ON_BN_CLICKED(IDC_BUTTON_CANcEL, &CAssignment2View::OnBnClickedButtonCancel)
+	ON_COMMAND(ID_ICON, &CAssignment2View::OnIcon)
+	ON_COMMAND(ID_SMALL_ICON, &CAssignment2View::OnSmallIcon)
+	ON_COMMAND(ID_LIST, &CAssignment2View::OnList)
+	ON_COMMAND(ID_REPORT, &CAssignment2View::OnReport)
+	ON_LBN_SELCHANGE(IDC_LIST2, &CAssignment2View::OnLbnSelchangeList2)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CAssignment2View::OnLvnItemchangedList1)
 END_MESSAGE_MAP()
 
 // CAssignment2View 생성/소멸
@@ -85,8 +91,9 @@ void CAssignment2View::DoDataExchange(CDataExchange* pDX)
 	DDX_FieldText(pDX, IDC_EDIT_EMAIL, m_pSet->m_email, m_pSet);
 	DDX_FieldText(pDX, IDC_EDIT_PHONE, m_pSet->m_phone, m_pSet);
 	DDX_FieldText(pDX, IDC_EDIT_COMPANY, m_pSet->m_company, m_pSet);
-	DDX_FieldText(pDX, IDC_EDIT_GROUP, m_pSet->m_group, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT_GROUP, m_pSet->m_groups, m_pSet);
 
+	DDX_Control(pDX, IDC_LIST2, m_List2);
 }
 
 BOOL CAssignment2View::PreCreateWindow(CREATESTRUCT& cs)
@@ -101,6 +108,12 @@ void CAssignment2View::OnInitialUpdate()
 {
 	m_pSet = &GetDocument()->m_Assignment2Set;
 	CRecordView::OnInitialUpdate();
+
+	m_List2.InsertString(0, _T("가족"));
+	m_List2.InsertString(1, _T("직장"));
+	m_List2.InsertString(2, _T("학교"));
+	m_List2.InsertString(3, _T("친구"));
+	m_List2.InsertString(4, _T("기타"));
 
 	AddColumn();
 	SetImageList();
@@ -163,17 +176,18 @@ void CAssignment2View::AddColumn() {
 	// 리스트 컨트롤의 크기를 얻어온다.
 	m_List.GetClientRect(&rect);
 	// 컬럼추가
+	//m_List.InsertColumn(0, _T("번호"), LVCFMT_RIGHT, 100);
 	m_List.InsertColumn(0, _T("이름"), LVCFMT_RIGHT, 100);
-	m_List.InsertColumn(1, _T("이메일 계정"), LVCFMT_LEFT, rect.Width() - 400);
-	m_List.InsertColumn(2, _T("전화번호"), LVCFMT_LEFT, 100);
-	m_List.InsertColumn(3, _T("직장명"), LVCFMT_LEFT, 100);
-	m_List.InsertColumn(4, _T("그룹"), LVCFMT_LEFT, 100);
+	m_List.InsertColumn(1, _T("이메일 계정"), LVCFMT_RIGHT, rect.Width() - 400);
+	m_List.InsertColumn(2, _T("전화번호"), LVCFMT_RIGHT, 100);
+	m_List.InsertColumn(3, _T("직장명"), LVCFMT_RIGHT, 100);
+	m_List.InsertColumn(4, _T("그룹"), LVCFMT_RIGHT, 100);
 }
 
 
 void CAssignment2View::SetImageList() {
-	m_LargeImageList.Create(IDB_BITMAP_LARGE, 48, 1, RGB(0, 0, 0));
-	m_SmallImageList.Create(IDB_BITMAP_SMALL, 16, 1, RGB(0, 0, 0));
+	m_LargeImageList.Create(IDB_BITMAP_LARGE, 48, 1, RGB(255, 255, 255));
+	m_SmallImageList.Create(IDB_BITMAP_SMALL, 16, 1, RGB(255, 255, 255));
 	m_List.SetImageList(&m_LargeImageList, LVSIL_NORMAL);
 	m_List.SetImageList(&m_SmallImageList, LVSIL_SMALL);
 }
@@ -188,13 +202,15 @@ void CAssignment2View::AddAllRecord() {
 	m_List.DeleteAllItems();
 
 	while (rsSet.IsEOF() == FALSE) {
-		strTemp.Format(_T("%4d"), rsSet.m_ID);
-		m_List.InsertItem(i, strTemp, 0);
-		m_List.SetItemText(i, 1, rsSet.m_name);
-		m_List.SetItemText(i, 2, rsSet.m_email);
-		m_List.SetItemText(i, 3, rsSet.m_phone);
-		m_List.SetItemText(i, 4, rsSet.m_company);
-		m_List.SetItemText(i, 5, rsSet.m_group);
+		//strTemp.Format(_T("%4d"), rsSet.m_ID);
+		//m_List.InsertItem(i, strTemp, 0);
+		//m_List.SetItemText(i, 1, rsSet.m_name);
+
+		m_List.InsertItem(i, rsSet.m_name, 0);
+		m_List.SetItemText(i, 1, rsSet.m_email);
+		m_List.SetItemText(i, 2, rsSet.m_phone);
+		m_List.SetItemText(i, 3, rsSet.m_company);
+		m_List.SetItemText(i, 4, rsSet.m_groups);
 
 		//strTemp.Format(_T("%4ld"), rsSet.m_price);
 		//m_List.SetItemText(i, 3, strTemp);
@@ -359,7 +375,7 @@ void CAssignment2View::OnBnClickedButtonDelete() {
 		return;
 	}
 	if (recordCount < currentPos) // 마지막 데이터 삭제시
-		currentPos--;// current_pos = record_count;
+		currentPos--; // current_pos = record_count;
 	m_pSet->SetAbsolutePosition(currentPos);
 	UpdateData(FALSE);
 	AddAllRecord();
@@ -367,7 +383,43 @@ void CAssignment2View::OnBnClickedButtonDelete() {
 
 
 void CAssignment2View::OnBnClickedButtonSearch() {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	bSearch = !bSearch; 
+	if (bSearch) { //검색 준비 
+		m_EditName.SetWindowTextW(_T(""));
+		m_EidtMail.SetWindowTextW(_T(""));
+		m_EditPhone.SetWindowTextW(_T(""));
+		m_EditCompany.SetWindowTextW(_T(""));
+		m_EditGroup.SetWindowTextW(_T(""));
+		Clear();
+
+		m_EidtMail.EnableWindow(0);
+		m_EditPhone.EnableWindow(0);
+		m_EditCompany.EnableWindow(0);
+		m_EditGroup.EnableWindow(0);
+		m_ButtonSearch.EnableWindow(1);
+		m_EditName.SetFocus(); 
+	} 
+	else { //검색 
+		UpdateData(TRUE); 
+		m_pSet->m_strFilter.Format(_T("name like '%%%s%%'"), m_pSet->m_name);
+		if (m_pSet->m_name.IsEmpty() == false) {
+			int i = 0;
+			m_pSet->Requery(); m_pSet->m_strFilter.Empty();
+			m_List.DeleteAllItems();
+
+			while (m_pSet->IsEOF() == FALSE) {
+				m_List.InsertItem(i, m_pSet->m_name, 0);
+				m_List.SetItemText(i, 1, m_pSet->m_email);
+				m_List.SetItemText(i, 2, m_pSet->m_phone);
+				m_List.SetItemText(i, 3, m_pSet->m_company);
+				m_List.SetItemText(i, 4, m_pSet->m_groups);
+				m_pSet->MoveNext(); 
+				i++;
+			}
+			// rsSet.Close();
+			Init();
+		}
+	}
 }
 
 
@@ -391,4 +443,84 @@ void CAssignment2View::OnBnClickedButtonCancel() {
 		bSearch = FALSE; //초기상태로 변경
 	}
 	Init();
+}
+
+
+void CAssignment2View::OnIcon() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_ICON);
+	//AddColumn();
+	//SetImageList();
+	//AddAllRecord();
+	//GetTotalRecordCount();
+}
+
+
+void CAssignment2View::OnSmallIcon() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_SMALLICON);
+}
+
+
+void CAssignment2View::OnList() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_LIST);
+}
+
+
+void CAssignment2View::OnReport() {
+	m_List.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+}
+
+
+void CAssignment2View::OnLbnSelchangeList2() {
+	CString Item;
+	int nIndex = m_List2.GetCurSel();
+
+	if (nIndex != LB_ERR) m_List2.GetText(nIndex, Item);
+
+	UpdateData(TRUE);
+	m_pSet->m_strFilter.Format(_T("groups like '%%%s%%'"), Item);
+	//m_pSet->m_strFilter.Format(_T("group like '%s'"), Item);
+	//if (m_pSet->m_groups.IsEmpty() == false) {
+		int i = 0;
+		m_pSet->Requery(); 
+		m_pSet->m_strFilter.Empty();
+		m_List.DeleteAllItems();
+
+		while (m_pSet->IsEOF() == FALSE) {
+			m_List.InsertItem(i, m_pSet->m_name, 0);
+			m_List.SetItemText(i, 1, m_pSet->m_email);
+			m_List.SetItemText(i, 2, m_pSet->m_phone);
+			m_List.SetItemText(i, 3, m_pSet->m_company);
+			m_List.SetItemText(i, 4, m_pSet->m_groups);
+			m_pSet->MoveNext();
+			i++;
+		}
+		//Init();
+	//}
+}
+
+
+void CAssignment2View::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult) {
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int nItem = pNMLV->iItem; //선택된 항목의 행의 위치 값을 얻어옵니다.
+
+	currentPos = nItem + 1;
+	m_pSet->SetAbsolutePosition(currentPos);
+
+	CString strID, sql;
+	strID = m_List.GetItemText(nItem, 0); //선택된 도서번호를 얻어와
+	sql.Format(_T("select * from address where name='%s'"), strID); //도서번호로 검색
+	
+	//m_pSet->Requery(); m_pSet->m_strFilter.Empty();
+
+	CAssignment2Set rsSet(m_pSet->m_pDatabase);
+	rsSet.Open(CRecordset::dynaset, sql);
+
+	m_EditName.SetWindowTextW(rsSet.m_name); //제목을 얻어 와서 출력
+	m_EidtMail.SetWindowTextW(rsSet.m_email); //제목을 얻어 와서 출력
+	m_EditPhone.SetWindowTextW(rsSet.m_phone); //제목을 얻어 와서 출력
+	m_EditCompany.SetWindowTextW(rsSet.m_company); //제목을 얻어 와서 출력
+	m_EditGroup.SetWindowTextW(rsSet.m_groups); //제목을 얻어 와서 출력
+
+	*pResult = 0;
 }

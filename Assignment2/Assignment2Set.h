@@ -28,7 +28,7 @@ public:
 	CStringW	m_email;	   //이메일 계정
 	CStringW	m_phone;	//전화번호
 	CStringW	m_company;	//직장명
-	CStringW	m_group;	//( 가족 / 직장 / 학교 / 친구 / 기타 ) 중 하나
+	CStringW	m_groups;	//( 가족 / 직장 / 학교 / 친구 / 기타 ) 중 하나
 
 // 재정의
 	// 마법사에서 생성한 가상 함수 재정의
