@@ -109,11 +109,11 @@ void CAssignment2View::OnInitialUpdate()
 	m_pSet = &GetDocument()->m_Assignment2Set;
 	CRecordView::OnInitialUpdate();
 
-	m_List2.AddString(_T("가족"));
-	m_List2.AddString(_T("직장"));
-	m_List2.AddString(_T("학교"));
-	m_List2.AddString(_T("친구"));
-	m_List2.AddString(_T("기타"));
+	m_List2.InsertString(0, _T("가족"));
+	m_List2.InsertString(1, _T("직장"));
+	m_List2.InsertString(2, _T("학교"));
+	m_List2.InsertString(3, _T("친구"));
+	m_List2.InsertString(4, _T("기타"));
 
 	AddColumn();
 	SetImageList();
